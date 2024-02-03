@@ -13,6 +13,25 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceProviderKeyedServiceExtensions
     {
         /// <summary>
+        /// Get service of type <paramref name="serviceType"/> from the <see cref="IServiceProvider"/>.
+        /// </summary>
+        /// <param name="provider">The <see cref="IServiceProvider"/> to retrieve the service object from.</param>
+        /// <param name="serviceType">An object that specifies the type of service object to get.</param>
+        /// <param name="serviceKey">An object that specifies the key of service object to get.</param>
+        /// <returns>A service object of type <paramref name="serviceType"/>.</returns>
+        public static object? GetKeyedService(this IServiceProvider provider, Type serviceType, object? serviceKey)
+        {
+            ThrowHelper.ThrowIfNull(provider);
+
+            if (provider is IKeyedServiceProvider keyedServiceProvider)
+            {
+                return (T?)keyedServiceProvider.GetKeyedService(typeof(T), serviceKey);
+            }
+
+            throw new InvalidOperationException(SR.KeyedServicesNotSupported);
+        }
+
+        /// <summary>
         /// Get service of type <typeparamref name="T"/> from the <see cref="IServiceProvider"/>.
         /// </summary>
         /// <typeparam name="T">The type of service object to get.</typeparam>
@@ -23,12 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             ThrowHelper.ThrowIfNull(provider);
 
-            if (provider is IKeyedServiceProvider keyedServiceProvider)
-            {
-                return (T?)keyedServiceProvider.GetKeyedService(typeof(T), serviceKey);
-            }
-
-            throw new InvalidOperationException(SR.KeyedServicesNotSupported);
+            return (T)provider.GetKeyedService(typeof(T), serviceKey);
         }
 
         /// <summary>
